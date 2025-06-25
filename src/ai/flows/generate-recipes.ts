@@ -21,11 +21,12 @@ export type GenerateRecipesInput = z.infer<typeof GenerateRecipesInputSchema>;
 const GenerateRecipesOutputSchema = z.object({
   recipes: z.array(
     z.object({
-      title: z.string().describe('The title of the recipe.'),
+      title: z.string().describe('The creative and appealing title of the recipe.'),
+      description: z.string().describe('A short, enticing description of the dish, highlighting its unique flavors and appeal.'),
       ingredients: z.array(z.string()).describe('The list of ingredients required for the recipe.'),
-      instructions: z.string().describe('Brief instructions for the recipe.'),
+      instructions: z.string().describe('Clear, concise, and easy-to-follow instructions for preparing the recipe.'),
     })
-  ).describe('A list of recipes generated from the given ingredients.'),
+  ).describe('A list of unique and tasty recipes generated from the given ingredients.'),
 });
 export type GenerateRecipesOutput = z.infer<typeof GenerateRecipesOutputSchema>;
 
@@ -37,9 +38,19 @@ const generateRecipesPrompt = ai.definePrompt({
   name: 'generateRecipesPrompt',
   input: {schema: GenerateRecipesInputSchema},
   output: {schema: GenerateRecipesOutputSchema},
-  prompt: `You are a professional chef. Given the following ingredients, generate a list of recipes that can be made with them. Recipes should be suitable for home cooking and include a title, list of ingredients, and brief instructions.
+  prompt: `You are a culinary artist, a world-renowned chef celebrated for your innovative, mouth-watering, and unique recipes. Your specialty is turning everyday ingredients into extraordinary culinary experiences.
 
-Ingredients:
+Given the following list of ingredients, your task is to craft a selection of appealing, unique, and delicious recipes. These recipes should be suitable for a home cook but have a touch of gourmet flair.
+
+For each recipe, provide:
+1. A creative and appealing title.
+2. A short, enticing description that makes the dish sound irresistible.
+3. A complete list of ingredients needed.
+4. Clear, step-by-step instructions that are easy to follow.
+
+Focus on creating recipes that are not just standard or boring, but are genuinely exciting and make the best use of the provided ingredients.
+
+Ingredients available:
 {{#each ingredients}}- {{{this}}}
 {{/each}}`,
 });

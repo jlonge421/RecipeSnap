@@ -26,8 +26,13 @@ export function RecipeCard({ recipe, isSaved, onSaveToggle }: RecipeCardProps) {
           data-ai-hint={recipe.dataAiHint || "food cooking"}
         />
       </div>
-      <CardHeader className="pb-2">
+      <CardHeader className="pb-4">
         <CardTitle className="text-xl font-semibold line-clamp-2">{recipe.title}</CardTitle>
+        {recipe.description && (
+          <CardDescription className="pt-1 line-clamp-3">
+            {recipe.description}
+          </CardDescription>
+        )}
       </CardHeader>
       <CardContent className="flex-grow space-y-3">
         <Accordion type="single" collapsible className="w-full">
