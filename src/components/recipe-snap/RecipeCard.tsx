@@ -23,7 +23,7 @@ export function RecipeCard({ recipe, isSaved, onSaveToggle }: RecipeCardProps) {
           alt={recipe.title}
           layout="fill"
           objectFit="cover"
-          data-ai-hint={recipe.dataAiHint || "food cooking"}
+          data-ai-hint={recipe.dataAiHint}
         />
       </div>
       <CardHeader className="pb-4">

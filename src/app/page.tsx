@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { identifyIngredients, type IdentifyIngredientsOutput } from '@/ai/flows/identify-ingredients';
 import { generateRecipes, type GenerateRecipesOutput } from '@/ai/flows/generate-recipes';
+import { generateRecipeImage } from '@/ai/flows/generate-recipe-image';
 import useLocalStorage from '@/hooks/useLocalStorage';
 import { Loader2, Salad, Sparkles } from 'lucide-react'; // Sparkles for AI generation
 import { Separator } from '@/components/ui/separator';
@@ -66,6 +67,27 @@ export default function RecipeSnapPage() {
     }
   };
 
+  const generateRecipeImages = (recipesToProcess: Recipe[]) => {
+    recipesToProcess.forEach(async (recipe) => {
+      try {
+        const imageResult = await generateRecipeImage({
+          title: recipe.title,
+          description: recipe.description,
+        });
+        if (imageResult?.imageUrl) {
+          setRecipes((currentRecipes) =>
+            currentRecipes.map((r) =>
+              r.id === recipe.id ? { ...r, imageUrl: imageResult.imageUrl, dataAiHint: undefined } : r
+            )
+          );
+        }
+      } catch (e) {
+        console.error(`Failed to generate image for recipe: ${recipe.title}`, e);
+        // Keep placeholder on error, the user won't be notified to avoid spamming toasts.
+      }
+    });
+  };
+
   const handleGenerateRecipes = async (currentIngredients?: string[]) => {
     const ingredientsToUse = currentIngredients || ingredients;
     if (ingredientsToUse.length === 0) {
@@ -81,12 +103,15 @@ export default function RecipeSnapPage() {
       if (result && result.recipes && result.recipes.length > 0) {
         const recipesWithPlaceholders: Recipe[] = result.recipes.map((recipe, index) => ({
           ...recipe,
-          id: recipe.title + "_" + index, // Simple unique ID
-          imageUrl: `https://placehold.co/400x300.png?text=${encodeURIComponent(recipe.title)}`,
-          dataAiHint: "food cooking", 
+          id: recipe.title.replace(/\s+/g, '_') + "_" + index, // More robust ID
+          imageUrl: `https://placehold.co/400x300.png`,
+          dataAiHint: "food photography", 
         }));
         setRecipes(recipesWithPlaceholders);
-        toast({ title: 'Recipes Generated!', description: `${recipesWithPlaceholders.length} recipes ready for you.` });
+        toast({ title: 'Recipes Generated!', description: `Now creating images for ${recipesWithPlaceholders.length} recipes.` });
+
+        // Generate images in the background
+        generateRecipeImages(recipesWithPlaceholders);
       } else {
         setRecipes([]);
         toast({ title: 'No Recipes Generated', description: 'Could not generate recipes from the identified ingredients.', variant: 'default' });
